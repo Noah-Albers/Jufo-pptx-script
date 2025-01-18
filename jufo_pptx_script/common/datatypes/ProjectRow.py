@@ -1,0 +1,261 @@
+from jufo_pptx_script.data.DataRow import DataRow as _DataRow
+
+class TutorRowWrapper:
+
+    def __init__(self, idx: int, base):
+        self._idx = idx
+        self._base: ProjectRowWrapper = base
+        self._name_cache: [str, str, str] or None = None
+
+    def _create_name_cache(self):
+        raw_value = self._base.get(f"Projektbetreuer {self._idx}")
+        value = raw_value.split(" ")
+
+        if len(value) == 0 and len(value[0].strip()) == 0:
+            self._name_cache = ["", "", ""]
+
+        # Ensures correct formatting
+        if not (2 <= len(value) <= 3):
+            raise ValueError(f"Field Projektbetreuer {self._idx} has invalid value. Must be of type 'TITLE NACHNAME VORNAME' but is actually '{raw_value}'")
+
+        if len(value) == 2:
+            value.insert(0, "")
+
+        self._name_cache = value
+
+    @property
+    def Ist_Existent(self):
+        self._create_name_cache()
+        return all(map(lambda x: len(x) == 0, self._name_cache))
+
+    @property
+    def Schule(self):
+        return self._base.get(f"Projektbetreuer {self._idx} Schule")
+
+    @property
+    def Vorname(self):
+        if self._name_cache is None:
+            self._create_name_cache()
+
+        return self._name_cache[2]
+
+    @property
+    def Nachname(self):
+        if self._name_cache is None:
+            self._create_name_cache()
+
+        return self._name_cache[1]
+
+    @property
+    def Title(self):
+        if self._name_cache is None:
+            self._create_name_cache()
+
+        return self._name_cache[0]
+
+class MemberRowWrapper:
+    def __init__(self, idx: int, base):
+        self._idx = idx
+        self._base: ProjectRowWrapper = base
+
+    def get(self, field: str):
+        return self._base.get(f"T{self._idx} {field}")
+
+    @property
+    def Alter(self) -> int:
+        return self._base._get_property_as_int(f"T{self._idx} Alter")
+
+    @property
+    def Vorname(self) -> str:
+        return self.get("Vorname")
+
+    @property
+    def Nachname(self) -> str:
+        return self.get("Nachname")
+
+    @property
+    def Klasse(self) -> str:
+        return self.get("Klasse")
+
+    @property
+    def Schule_Name(self) -> str:
+        return self.get("Schule etc. Name")
+
+    @property
+    def Schule_Ort(self) -> str:
+        return self.get("Schule etc. Ort")
+
+    @property
+    def Schule_Art(self) -> str:
+        return self.get("Art der Schule etc.")
+
+class ProjectRowWrapper:
+
+    def __init__(self, dr: _DataRow):
+        self._dr = dr
+        self._members = [MemberRowWrapper(i+1,self) for i in range(3)]
+        self._tutors = [TutorRowWrapper(i+1, self) for i in range(2)]
+
+    # region Direct properties
+
+    def get_member(self, idx_from_one):
+        if type(idx_from_one) is str:
+            idx_from_one = int(idx_from_one.replace("T", ""))
+
+        if type(idx_from_one) is not int or not (1 <= idx_from_one <= 3):
+            raise ValueError(f"get_member was passed invalid argument '{idx_from_one}' idx_from_one must be an int between 1 and 3")
+
+        return self._members[idx_from_one-1]
+
+    def get_tutor(self, idx_from_one):
+        return self._tutors[idx_from_one-1]
+
+    @property
+    def T1(self) -> MemberRowWrapper:
+        return self._members[0]
+
+    @property
+    def T2(self) -> MemberRowWrapper:
+        return self._members[1]
+
+    @property
+    def T3(self) -> MemberRowWrapper:
+        return self._members[2]
+
+    @property
+    def Projektbetreuer1(self) -> TutorRowWrapper:
+        return self._tutors[0]
+
+    @property
+    def Projektbetreuer2(self) -> TutorRowWrapper:
+        return self._tutors[1]
+
+    @property
+    def Projektnummer(self) -> int:
+        return self._get_property_as_int("Projektnummer")
+
+    @property
+    def Wettbewerbsjahr(self) -> int:
+        return self._get_property_as_int("Wettbewerbsjahr")
+
+    @property
+    def Bundesland(self) -> str:
+        return self.get("Bundesland")
+
+    @property
+    def Sparte(self) -> str:
+        return self.get("Sparte")
+
+    @property
+    def Fachgebiet(self) -> str:
+        return self.get("Fachgebiet")
+
+    @property
+    def Projekttitel(self) -> str:
+        return self.get("Projekttitel")
+
+    @property
+    def Standnummer(self) -> str:
+        return self.get("Standnummer")
+
+    @property
+    def Teilnahmestatus(self) -> bool or None:
+        val = self.get("Teilnahmestatus")
+
+        if val == "Nimmt teil":
+            return True
+        if val == "Zurückgezogen":
+            return False
+        if len(val.strip()) == 0:
+            return None
+
+        raise ValueError(f"Field Teilnahmestatus is none of 'Nimmt teil', 'Zurückgezogen', '' but '{val}'.")
+
+    @property
+    def Sicherheitsrelevant(self) -> bool or None:
+        return self._get_property_as_yes_no_empty("Sicherheitsrelevant")
+
+    @property
+    def Erarbeitungsort_Art(self) -> str:
+        return self.get("Erarbeitungsort Art")
+
+    @property
+    def Erarbeitungsort(self):
+        return self.get("Erarbeitungsort")
+
+    @property
+    def Erarbeitungsort_Ort(self):
+        return self.get("Erarbeitungsort Ort")
+
+    @property
+    def Gruppengröße(self) -> int:
+        return self._get_property_as_int("Gruppengröße", min_value=1, max_value=3)
+
+    @property
+    def Patent(self) -> bool or None:
+        return self._get_property_as_yes_no_empty("Patent")
+
+    @property
+    def Projekt_mit_Tieren(self):
+        return self._get_property_as_yes_no_empty("Projekt mit Tieren")
+
+    # endregion
+
+    def get(self, field: str):
+
+        try:
+            return self._dr.get(field, raise_raw_error=True)
+        except ValueError:
+            raise ValueError(f"Field '{field}' couldn't be found on ProjectRow "
+                             f"{self._get_minimal_infos()} but was requested.'")
+
+    # region Field-retrieve Utils (Get Utils)
+
+    def _get_property_as_int(self, field: str, min_value: int or None = None, max_value: int or None = None):
+        value = self.get(field)
+        try:
+            value = int(value)
+
+            if min_value is not None and value < min_value:
+                raise ValueError(f"{field} has a value {value} but must at least be {min_value}.")
+            if max_value is not None and value > max_value:
+                raise ValueError(f"{field} has a value {value} but must less or equal to {max_value}.")
+
+        except ValueError:
+            raise ValueError(f"{field} is not an integer, instead is '{value}'.")
+
+    def _get_property_as_yes_no_empty(self, field: str) -> bool or None:
+        value = self.get(field)
+
+        if value == 'Ja':
+            return True
+        if value == 'Nein':
+            return False
+        if len(value.strip()) == 0:
+            return None
+
+        raise ValueError(f"{field} is none of 'Ja', 'Nein' or '' but instead is '{value}'.")
+
+    def _get_minimal_infos(self) -> str:
+        """
+        Tries to generate a minimal descriptor (name and project id) about this project row
+        """
+
+        name = self._dr.get("Projekttitel", default_value=-1)
+        number = self._dr.get("Projektnummer", default_value=-1)
+
+        if name == -1 and number == -1:
+            return "'Unknown Project'"
+
+        if name == -1:
+            return f"'Unknown Title' ({number})"
+
+        if number == -1:
+            return f"'{name}' (Unknown Projektnummer)"
+
+        return f"'{name}' ({number})"
+
+    def __str__(self):
+        return f"ProjectRow[{self._get_minimal_infos()}]"
+
+    # endregion

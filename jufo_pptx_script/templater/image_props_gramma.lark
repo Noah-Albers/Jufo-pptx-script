@@ -1,0 +1,17 @@
+start: text scaling?
+
+text: /[^<>]+/
+
+scaling: "<" scale_value ">"
+
+scale_value: percentage | pixel_ratio
+
+percentage: INT "%"
+
+pixel_ratio: pixel "/" pixel
+
+pixel: INT "px"
+
+%import common.INT
+%import common.WS
+%ignore WS

@@ -1,0 +1,7 @@
+local/
+.idea/
+ppinfo.py
+old
+__pycache__
+.git-old/
+example.py

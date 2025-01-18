@@ -1,0 +1,17 @@
+start: (text | template)+
+
+template: "{{" WS_INLINE* function_call WS_INLINE* "}}"
+
+function_call: function_name function_arg?
+
+function_arg: "(" args* argument? ")"
+
+args: argument ","
+
+function_name: /[A-Za-z0-9_]+/
+
+argument: /[A-Za-z0-9_\-. äöüÄÖÜß]+/
+
+text: /[^{}]+/
+
+%import common.WS_INLINE
