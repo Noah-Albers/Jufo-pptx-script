@@ -7,7 +7,8 @@ setup(
     install_requires=[
         'python-pptx>=1.0.2',
         'lark>=1.2.2',
-        'pillow>=11.1.0'
+        'pillow>=11.1.0',
+        "tqdm>=4.67.1"
     ],
     author='Noah Albers',
     author_email='albers-noah@pm.me',
