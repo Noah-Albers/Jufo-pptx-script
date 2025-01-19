@@ -7,6 +7,8 @@ from PIL import Image
 from pptx.shapes.placeholder import SlidePlaceholder, PicturePlaceholder
 from pptx.shapes.autoshape import Shape as AutoShape
 from typing import Any
+import sys
+import tqdm
 
 
 def _clamp(value, min_value, max_value):
@@ -87,8 +89,10 @@ class EasySlide:
         try:
             img_as_bytes = self._load_image(res)
             placeholder.insert_picture(img_as_bytes)
+        except FileNotFoundError:
+            print(f"\rImage at '{res.result}' was not found, skipping...",file=sys.stderr)
         except Exception as err:
-            raise ValueError(f"Image at '{res}' couldn't be loaded: {err}")
+            raise ValueError(f"Image at '{res.result}' couldn't be loaded: {err}")
 
 
     # endregion
