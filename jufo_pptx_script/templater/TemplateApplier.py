@@ -1,9 +1,9 @@
 import lark.exceptions
 from lark import Lark as _Lark, Transformer as _Transformer
 from jufo_pptx_script.templater.Template import Template as _Template
-from jufo_pptx_script.data.DataRow import DataRow as _DataRow
 from jufo_pptx_script.templater.ImagePropertiesParser import ImageInfoParser as _ImageInfoParser
 from dataclasses import dataclass as _dt
+from typing import Any
 
 @_dt
 class ParseResult:
@@ -18,10 +18,10 @@ class ImageParseResult(ParseResult):
 
 # Lark transformer to flatten and map the syntax
 class _TemplateTransformer(_Transformer):
-    def __init__(self, template_collection: _Template, data: list[_DataRow] or _DataRow):
+    def __init__(self, template_collection: _Template, data: Any):
         super().__init__()
         self.template_collection = template_collection._get_registered()
-        self.data = [data] if isinstance(data, _DataRow) else data
+        self.data = data
 
     def function_call(self, args):
         func_name = args[0]
@@ -56,13 +56,13 @@ class _TemplateTransformer(_Transformer):
 class TemplateApplier:
 
     def __init__(self):
-        with open("jufo_pptx_script/tools/templater/template_grammar.lark", "r") as file:
+        with open("jufo_pptx_script/templater/template_grammar.lark", "r") as file:
             grammar = file.read()
 
         self.__parser = _Lark(grammar, start='start', parser='lalr')
         self.__img_parser = _ImageInfoParser()
 
-    def parse_with_image_properties(self, template: _Template, data: _DataRow or [_DataRow], text: str)\
+    def parse_with_image_properties(self, template: _Template, data: Any, text: str)\
             -> ImageParseResult:
         # Parses first for templates
         res = self.parse(template, data, text)
@@ -71,7 +71,7 @@ class TemplateApplier:
 
         return ImageParseResult(path, scale, res)
 
-    def parse(self, template: _Template, data: _DataRow or [_DataRow], text: str) -> str:
+    def parse(self, template: _Template, data: Any, text: str) -> str:
 
         if len(text) <= 0:
             return ""

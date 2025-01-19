@@ -32,7 +32,7 @@ class _TemplateTransformer(_Transformer):
 class ImageInfoParser:
 
     def __init__(self):
-        with open("jufo_pptx_script/tools/templater/image_props_gramma.lark", "r") as file:
+        with open("jufo_pptx_script/templater/image_props_gramma.lark", "r") as file:
             grammar = file.read()
 
         self.__parser = _Lark(grammar, start='start', parser='lalr')
