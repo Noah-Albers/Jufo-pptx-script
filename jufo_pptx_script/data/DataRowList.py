@@ -1,11 +1,12 @@
-from typing import Iterator
-from jufo_pptx_script.data.DataRow import DataRow
-from typing import Callable
+from typing import Callable, TypeVar, Generic, Iterator
 from functools import cmp_to_key
 
 
-class DataRowList:
-    def __init__(self, raw: list[DataRow]):
+# Defines a generic type for the items
+T = TypeVar('T')
+
+class DataRowList(Generic[T]):
+    def __init__(self, raw: list[T]):
         self.__list = raw
 
     def skip(self, amount: int):
@@ -54,18 +55,18 @@ class DataRowList:
         """
         return DataRowList(self.__list.copy())
 
-    def filter(self, filter_func: Callable[[DataRow], bool]):
+    def filter(self, filter_func: Callable[[T], bool]):
         """
         Filters the list (Does not create a new list
         """
         self.__list = list(filter(filter_func, self.__list))
         return self
 
-    def sort(self, sort_func: Callable[[DataRow, DataRow], int]):
-        def internal_sort_function(a: DataRow, b: DataRow):
+    def sort(self, sort_func: Callable[[T, T], int]):
+        def internal_sort_function(a: T, b: T):
             res = sort_func(a, b)
 
-            if isinstance(res, DataRow):
+            if res == a or res == b:
                 return 1 if a == res else -1
 
             if type(res) is int:
@@ -101,7 +102,7 @@ class DataRowList:
 
     # region Iteration logic
 
-    def __iter__(self) -> Iterator[DataRow]:
+    def __iter__(self) -> Iterator[T]:
         self.__index = 0
         return self
 
