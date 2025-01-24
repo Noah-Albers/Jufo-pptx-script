@@ -21,7 +21,7 @@ class EasySlide:
         self.__slide = slide
         self.__pptx = pptx
 
-    def apply_template(self, data: Any, template: Template):
+    def apply_template(self, template: Template, data: Any):
 
         for shape in self.__slide.shapes:
             if isinstance(shape, AutoShape):
