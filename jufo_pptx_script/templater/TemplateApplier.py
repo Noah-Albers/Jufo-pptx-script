@@ -3,7 +3,10 @@ from lark import Lark as _Lark, Transformer as _Transformer
 from jufo_pptx_script.templater.Template import Template as _Template
 from jufo_pptx_script.templater.ImagePropertiesParser import ImageInfoParser as _ImageInfoParser
 from dataclasses import dataclass as _dt
-from typing import Any
+from typing import Any, Dict
+import sys
+import inspect
+import os
 
 @_dt
 class ParseResult:
@@ -18,35 +21,81 @@ class ImageParseResult(ParseResult):
 
 # Lark transformer to flatten and map the syntax
 class _TemplateTransformer(_Transformer):
-    def __init__(self, template_collection: _Template, data: Any):
+    def __init__(self, template_collection: _Template, data: Dict[str, Any]):
         super().__init__()
         self.template_collection = template_collection._get_registered()
         self.data = data
 
     def function_call(self, args):
         func_name = args[0]
-        args = args[1] if len(args) > 1 else []
+        args = args[1] if len(args) > 1 else {}
 
-        if func_name not in self.template_collection:
+        # Checks if any key is part of both
+        duplicated_keys = list(filter(lambda k: k in self.data,args))
+        if len(duplicated_keys) > 0:
+            print(f"\rWarning: Argument(s) '{', '.join(duplicated_keys)}' for function '{func_name}' is duplicated (Given from the user script and from the interpreted text). ",file=sys.stderr)
+
+        # Builds the dict with the arguments
+        args2pass = {
+            **self.data, # Data passed from the script
+            **args       # Data passed from the text-call
+        }
+
+        # Retrieves the function that got registered using the template
+        func = self.template_collection.get(func_name, None)
+
+        # Ensures the function exists
+        if func is None:
             raise ValueError(f"Function {func_name} is not defined")
+
+
+        # Checks that the keys from the function and args2pass dict match
+        sig = inspect.signature(func)
+
+
+        # Gets all parameter's in general
+        func_params = sig.parameters.values()
+        func_params_names = list(map(lambda param: param.name, func_params))
+
+        # Gets all parameters that are required to run the function but are missing
+        missing_func_params = filter(lambda param: param.default is param.empty and param.name not in args2pass, func_params)
+        missing_func_params_names = list(map(lambda param: param.name, missing_func_params))
+
+        # Gets the parameters that have been submitted but are not part of the function
+        none_func_params_names = list(filter(lambda name: name not in func_params_names, args2pass.keys()))
+
+        # Checks that all required parameters are given
+        if len(missing_func_params_names) > 0:
+            raise ValueError(f"Function '{func_name}' requires the parameter(s) '{', '.join(missing_func_params_names)}', which are/were not given.")
+
+        # Checks that not too many parameters are given
+        if len(none_func_params_names) > 0:
+            raise ValueError(f"Function '{func_name}' doesn't have/has the parameter(s) '{', '.join(none_func_params_names)}', but they were passed anyway.")
+
         try:
-            return str(self.template_collection[func_name](self.data, args))
+            return str(func(**args2pass))
         except Exception as err:
             raise ValueError(f"Function '{func_name}' run into an error while executing: {err}")
 
     def args(self, args):
-        return str(args[0])
+        return args[0]
 
     def template(self, args):
-        return args[1] if len(args) >= 2 else ""
+        return args[0]
 
     def function_arg(self, args):
-        return args
+        return {key: value for key, value in args}
 
     def function_name(self, name):
         return str(name[0])
 
     def argument(self, arg):
+        return arg
+
+    def argument_name(self, arg):
+        return str(arg[0]).strip()
+
+    def argument_value(self, arg):
         return str(arg[0]).strip()
 
     def text(self, text):
@@ -56,7 +105,8 @@ class _TemplateTransformer(_Transformer):
 class TemplateApplier:
 
     def __init__(self):
-        with open("jufo_pptx_script/templater/template_grammar.lark", "r") as file:
+        path = os.path.join(os.path.dirname(__file__), 'template_grammar.lark')
+        with open(path, "r") as file:
             grammar = file.read()
 
         self.__parser = _Lark(grammar, start='start', parser='lalr')
@@ -71,7 +121,7 @@ class TemplateApplier:
 
         return ImageParseResult(path, scale, res)
 
-    def parse(self, template: _Template, data: Any, text: str) -> str:
+    def parse(self, template: _Template, data: Dict[str, Any], text: str) -> str:
 
         if len(text) <= 0:
             return ""

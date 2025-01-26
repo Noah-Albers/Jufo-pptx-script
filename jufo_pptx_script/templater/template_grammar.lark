@@ -10,8 +10,13 @@ args: argument ","
 
 function_name: /[A-Za-z0-9_]+/
 
-argument: /[A-Za-z0-9_\-. äöüÄÖÜß]+/
+argument: argument_name WS_INLINE* "=" WS_INLINE* argument_value
+
+argument_value: /[A-Za-z0-9_\-. äöüÄÖÜß]+/
+
+argument_name: /[A-Za-z0-9_]+/
 
 text: /[^{}]+/
 
 %import common.WS_INLINE
+%ignore WS_INLINE

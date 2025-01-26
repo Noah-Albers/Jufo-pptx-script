@@ -1,5 +1,6 @@
 import lark.exceptions
 from lark import Lark as _Lark, Transformer as _Transformer
+import os
 
 
 # Lark transformer to flatten and map the syntax
@@ -32,7 +33,8 @@ class _TemplateTransformer(_Transformer):
 class ImageInfoParser:
 
     def __init__(self):
-        with open("jufo_pptx_script/templater/image_props_gramma.lark", "r") as file:
+        path = os.path.join(os.path.dirname(__file__), 'image_props_gramma.lark')
+        with open(path, "r") as file:
             grammar = file.read()
 
         self.__parser = _Lark(grammar, start='start', parser='lalr')
