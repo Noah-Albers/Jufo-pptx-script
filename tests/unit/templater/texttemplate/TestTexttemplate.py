@@ -84,7 +84,7 @@ class TestTexttemplate(unittest.TestCase):
             parse("I am {{two_args_text( a = A c , b =   D f    )}}"),
             parse("I am {{two_args_text( a= A c , b =   D f    )}}"),
             parse("I am {{   two_args_text(   a    =   A c   ,    b    =     D f    )}}"),
-            parse("I am {{ two_args_text( a = A c , b = D f ) }} "),
+            parse("I am {{ two_args_text( a = A c , b = D f ) }}"),
             parse("I am {{ two_args_text(b=D f,a=A c) }}"),
         ], "I am two_args_text(A c,D f)")
 
@@ -180,3 +180,19 @@ Unknown error occurred. Please check your input: 'I am {{ f() }}' (Error trying 
 
 Function 'f' doesn't have/has the parameter(s) 'b', but they were passed anyway.)
         '''.strip(), str(context.exception).strip())
+
+    def test_whitespace_between_templates(self):
+
+        env, parse, assert_array = self.setup_environment()
+
+        @env
+        def f():
+            return f"f-call"
+
+        assert_array([
+            parse("I am {{f()}} {{f()}}"),
+            parse("I am {{ f() }} {{f()}}"),
+            parse("I am {{ f() }} {{ f() }}"),
+            parse("I am {{ f() }} {{   f(   )   }}"),
+            parse("I am {{    f(  )   }} {{   f(   )   }}"),
+        ],"I am f-call f-call")

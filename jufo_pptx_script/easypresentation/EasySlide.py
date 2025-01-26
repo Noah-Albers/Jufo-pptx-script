@@ -8,7 +8,6 @@ from pptx.shapes.placeholder import SlidePlaceholder, PicturePlaceholder
 from pptx.shapes.autoshape import Shape as AutoShape
 from typing import Any
 import sys
-import tqdm
 
 
 def _clamp(value, min_value, max_value):
@@ -21,7 +20,7 @@ class EasySlide:
         self.__slide = slide
         self.__pptx = pptx
 
-    def apply_template(self, template: Template, data: Any):
+    def apply_template(self, template: Template, data: dict[str, Any]):
 
         for shape in self.__slide.shapes:
             if isinstance(shape, AutoShape):
@@ -74,14 +73,14 @@ class EasySlide:
         img_bytes.seek(0)
         return img_bytes
 
-    def __update_text_placeholder(self, data: Any, raw_text: str,
+    def __update_text_placeholder(self, data: dict[str, Any], raw_text: str,
                                   element: SlidePlaceholder or AutoShape, template: Template):
         res = self.__pptx._template.parse(template, data, raw_text)
 
         # Parses the text and applies it to the placeholder
         element.text = res
 
-    def __update_image_placeholder(self, data: Any, raw_text: str,
+    def __update_image_placeholder(self, data: dict[str, Any], raw_text: str,
                                    placeholder: PicturePlaceholder, template: Template):
         # Resolves any templates inside the image infos
         res = self.__pptx._template.parse_with_image_properties(template, data, raw_text)

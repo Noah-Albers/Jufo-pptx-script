@@ -1,6 +1,6 @@
 start: (text | template)+
 
-template: "{{" WS_INLINE* function_call WS_INLINE* "}}"
+template: "{{" WS_IL? function_call WS_IL? "}}"
 
 function_call: function_name function_arg?
 
@@ -10,7 +10,7 @@ args: argument ","
 
 function_name: /[A-Za-z0-9_]+/
 
-argument: argument_name WS_INLINE* "=" WS_INLINE* argument_value
+argument: argument_name WS_IL? "=" WS_IL? argument_value
 
 argument_value: /[A-Za-z0-9_\-. äöüÄÖÜß]+/
 
@@ -18,5 +18,7 @@ argument_name: /[A-Za-z0-9_]+/
 
 text: /[^{}]+/
 
+WS_IL: /\s+/
+
 %import common.WS_INLINE
-%ignore WS_INLINE
+%ignore WS_IL
