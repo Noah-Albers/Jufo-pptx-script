@@ -11,7 +11,7 @@ setup(
         "tqdm>=4.67.1"
     ],
     package_data={
-        'jufo-pptx-script': ['*.txt', '*.lark'],
+        'jufo-pptx-script': ['templater/*.lark'],
     },
     include_package_data=True,
     author='Noah Albers',

@@ -1,1 +1,1 @@
-include *.lark
+include templater/*.lark
