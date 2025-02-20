@@ -9,7 +9,7 @@ from jufo_pptx_script.easypresentation.EasyPresentation import EasyPresentation
 from PIL import Image
 from pptx.shapes.placeholder import SlidePlaceholder, PicturePlaceholder
 from pptx.shapes.autoshape import Shape as AutoShape
-from typing import Any
+from typing import Any, Literal
 import sys
 import jufo_pptx_script.easypresentation.EasyTextformatter
 
@@ -23,6 +23,24 @@ class EasySlide:
     def __init__(self, slide: Slide, pptx: EasyPresentation):
         self.__slide = slide
         self.__pptx = pptx
+
+    def get_placeholder_types(self) -> dict[str, Literal["Picture"] or Literal["Text"] or None]:
+        types = dict()
+
+        for shape in self.__slide.shapes:
+            if isinstance(shape, AutoShape):
+                types[shape.text] = None
+
+        for i, pl in enumerate(self.__slide.placeholders):
+            # Gets the placeholder text (Which is not accessible otherwise)
+            text = self.__slide.slide_layout.placeholders[i].text
+
+            if isinstance(pl, SlidePlaceholder):
+                types[text] = "Text"
+            elif isinstance(pl, PicturePlaceholder):
+                types[text] = "Picture"
+
+        return types
 
     def apply_template(self, template: Template, data: dict[str, Any]):
 
