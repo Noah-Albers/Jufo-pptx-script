@@ -122,6 +122,10 @@ class EasySlide:
         # Resolves any templates inside the image infos
         res = self.__pptx._template.parse_with_image_properties(template, data, raw_text)
 
+        # Ensures that specific paths dont need to be loaded
+        if res == 'IGNORE_FLAG':
+            return
+
         try:
             img_as_bytes = self._load_image(res)
             placeholder.insert_picture(img_as_bytes)
