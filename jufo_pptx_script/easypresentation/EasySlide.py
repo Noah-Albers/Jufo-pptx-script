@@ -123,7 +123,7 @@ class EasySlide:
         res = self.__pptx._template.parse_with_image_properties(template, data, raw_text)
 
         # Ensures that specific paths dont need to be loaded
-        if res == 'IGNORE_FLAG':
+        if res.result == 'IGNORE_FLAG':
             return
 
         try:
