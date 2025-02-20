@@ -15,3 +15,7 @@ class Template:
 
     def _get_registered(self):
         return self.__registered
+
+    def add_ignored_names(self, names: [str]):
+        for name in names:
+            self.__registered[name] = "ignored_func"

@@ -50,32 +50,35 @@ class _TemplateTransformer(_Transformer):
         if func is None:
             raise ValueError(f"Function {func_name} is not defined")
 
+        # Checks if the function shall be ignored
+        is_ignored = func == 'ignored_func'
 
-        # Checks that the keys from the function and args2pass dict match
-        sig = inspect.signature(func)
+        if not is_ignored:
+            # Checks that the keys from the function and args2pass dict match
+            sig = inspect.signature(func)
 
 
-        # Gets all parameter's in general
-        func_params = sig.parameters.values()
-        func_params_names = list(map(lambda param: param.name, func_params))
+            # Gets all parameter's in general
+            func_params = sig.parameters.values()
+            func_params_names = list(map(lambda param: param.name, func_params))
 
-        # Gets all parameters that are required to run the function but are missing
-        missing_func_params = filter(lambda param: param.default is param.empty and param.name not in args2pass, func_params)
-        missing_func_params_names = list(map(lambda param: param.name, missing_func_params))
+            # Gets all parameters that are required to run the function but are missing
+            missing_func_params = filter(lambda param: param.default is param.empty and param.name not in args2pass, func_params)
+            missing_func_params_names = list(map(lambda param: param.name, missing_func_params))
 
-        # Gets the parameters that have been submitted but are not part of the function
-        none_func_params_names = list(filter(lambda name: name not in func_params_names, args2pass.keys()))
+            # Gets the parameters that have been submitted but are not part of the function
+            none_func_params_names = list(filter(lambda name: name not in func_params_names, args2pass.keys()))
 
-        # Checks that all required parameters are given
-        if len(missing_func_params_names) > 0:
-            raise ValueError(f"Function '{func_name}' requires the parameter(s) '{', '.join(missing_func_params_names)}', which are/were not given.")
+            # Checks that all required parameters are given
+            if len(missing_func_params_names) > 0:
+                raise ValueError(f"Function '{func_name}' requires the parameter(s) '{', '.join(missing_func_params_names)}', which are/were not given.")
 
-        # Checks that not too many parameters are given
-        if len(none_func_params_names) > 0:
-            raise ValueError(f"Function '{func_name}' doesn't have/has the parameter(s) '{', '.join(none_func_params_names)}', but they were passed anyway.")
+            # Checks that not too many parameters are given
+            if len(none_func_params_names) > 0:
+                raise ValueError(f"Function '{func_name}' doesn't have/has the parameter(s) '{', '.join(none_func_params_names)}', but they were passed anyway.")
 
         try:
-            result = func(**args2pass)
+            result = "" if is_ignored else func(**args2pass)
 
             if isinstance(result, EasyTextformatter):
                 return result
