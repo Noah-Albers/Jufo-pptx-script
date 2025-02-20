@@ -1,1 +1,2 @@
 include templater/*.lark
+include jufo_pptx_script/templater/*.lark
