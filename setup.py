@@ -10,6 +10,10 @@ setup(
         'pillow>=11.1.0',
         "tqdm>=4.67.1"
     ],
+    package_data={
+        'jufo-pptx-script': ['*.txt', '*.lark'],
+    },
+    include_package_data=True,
     author='Noah Albers',
     author_email='albers-noah@pm.me',
     description='Rewritten code of python-pptx to easily generate jufo presentations.',
