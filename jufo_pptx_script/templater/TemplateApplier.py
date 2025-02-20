@@ -1,5 +1,7 @@
 import lark.exceptions
 from lark import Lark as _Lark, Transformer as _Transformer
+
+from jufo_pptx_script.easypresentation.EasyTextformatter import EasyTextformatter
 from jufo_pptx_script.templater.Template import Template as _Template
 from jufo_pptx_script.templater.ImagePropertiesParser import ImageInfoParser as _ImageInfoParser
 from dataclasses import dataclass as _dt
@@ -73,7 +75,12 @@ class _TemplateTransformer(_Transformer):
             raise ValueError(f"Function '{func_name}' doesn't have/has the parameter(s) '{', '.join(none_func_params_names)}', but they were passed anyway.")
 
         try:
-            return str(func(**args2pass))
+            result = func(**args2pass)
+
+            if isinstance(result, EasyTextformatter):
+                return result
+
+            return str(result)
         except Exception as err:
             raise ValueError(f"Function '{func_name}' run into an error while executing: {err}")
 
@@ -115,16 +122,18 @@ class TemplateApplier:
     def parse_with_image_properties(self, template: _Template, data: Any, text: str)\
             -> ImageParseResult:
         # Parses first for templates
-        res = self.parse(template, data, text)
+        res = self.parse_as_string(template, data, text)
 
         path, scale = self.__img_parser.parse(res)
 
         return ImageParseResult(path, scale, res)
 
-    def parse(self, template: _Template, data: Dict[str, Any], text: str) -> str:
+    def parse_as_string(self, template: _Template, data: Dict[str, Any], text: str) -> str:
+        return ''.join(self.parse(template, data, text))
 
+    def parse(self, template: _Template, data: Dict[str, Any], text: str) -> [str or EasyTextformatter]:
         if len(text) <= 0:
-            return ""
+            return []
 
         try:
             tree = self.__parser.parse(text)
@@ -134,12 +143,12 @@ class TemplateApplier:
             # Creates a flat list of the results
             output = []
             for item in results.children:
-                if isinstance(item, str):
+                if isinstance(item, str) or isinstance(item, EasyTextformatter):
                     output.append(item)
                 else:
                     output.append(item.children[0])
 
-            return "".join(output)
+            return output
         except lark.exceptions.UnexpectedInput as err:
             raise ValueError(f"Unexpected input while parsing for templates:\n'{err.get_context(text)}'")
             pass

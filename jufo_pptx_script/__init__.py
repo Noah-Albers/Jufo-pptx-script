@@ -8,3 +8,4 @@ from jufo_pptx_script.common.datatypes.ProjectRow import ProjectRow
 from jufo_pptx_script.common.datatypes.PriceRow import PriceRow as as_pricerow
 from jufo_pptx_script.common.datatypes.PriceRow import PriceRow
 from tqdm import tqdm as inform_user
+from jufo_pptx_script.easypresentation.EasyTextformatter import EasyTextformatter as format

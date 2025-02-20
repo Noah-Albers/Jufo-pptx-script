@@ -1,3 +1,6 @@
+from pptx.dml.color import RGBColor
+
+from jufo_pptx_script.easypresentation.EasyTextformatter import EasyTextformatter
 from jufo_pptx_script.templater.Template import Template
 from jufo_pptx_script.templater.TemplateApplier import ImageParseResult
 from pptx.slide import Slide
@@ -8,6 +11,7 @@ from pptx.shapes.placeholder import SlidePlaceholder, PicturePlaceholder
 from pptx.shapes.autoshape import Shape as AutoShape
 from typing import Any
 import sys
+import jufo_pptx_script.easypresentation.EasyTextformatter
 
 
 def _clamp(value, min_value, max_value):
@@ -77,8 +81,23 @@ class EasySlide:
                                   element: SlidePlaceholder or AutoShape, template: Template):
         res = self.__pptx._template.parse(template, data, raw_text)
 
-        # Parses the text and applies it to the placeholder
-        element.text = res
+        # Gets the text-frame (Used to apply formatting and texts)
+        frame = element.text_frame
+
+        for text in res:
+
+            # Ensures any none-compliant data types are converted to a string
+            if not isinstance(text, EasyTextformatter):
+                text = str(text)
+
+            # If only a text is given, apply it
+            if type(text) is str:
+                frame.paragraphs[0].add_run().text = text
+                continue
+
+            # Applies the formatted text
+            text._apply_to_frame(frame)
+
 
     def __update_image_placeholder(self, data: dict[str, Any], raw_text: str,
                                    placeholder: PicturePlaceholder, template: Template):

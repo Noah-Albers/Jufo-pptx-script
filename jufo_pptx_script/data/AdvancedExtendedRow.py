@@ -22,6 +22,13 @@ class AdvancedExtendedRow:
 
     #endregion
 
+    def has(self, field: str):
+        try:
+            self._dr.get(field, raise_raw_error=True)
+            return True
+        except ValueError:
+            return False
+
     def get(self, field: str):
         try:
             return self._dr.get(field, raise_raw_error=True)

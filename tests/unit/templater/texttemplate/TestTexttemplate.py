@@ -18,7 +18,7 @@ class TestTexttemplate(unittest.TestCase):
 
         applier = TemplateApplier()
 
-        parse: partial[str] = partial(applier.parse, env, data)
+        parse: partial[str] = partial(applier.parse_as_string, env, data)
 
         def assert_array(results: [str], value: str):
             for res in results:
@@ -195,4 +195,20 @@ Function 'f' doesn't have/has the parameter(s) 'b', but they were passed anyway.
             parse("I am {{ f() }} {{ f() }}"),
             parse("I am {{ f() }} {{   f(   )   }}"),
             parse("I am {{    f(  )   }} {{   f(   )   }}"),
-        ],"I am f-call f-call")
+        ], "I am f-call f-call")
+
+    def test_func_arg_optional(self):
+
+        env, parse, assert_array = self.setup_environment()
+
+        @env
+        def f():
+            return f"f-call"
+
+        assert_array([
+            parse("I am {{f}}"),
+            parse("I am {{f }}"),
+            parse("I am {{f   }}"),
+            parse("I am {{  f }}"),
+            parse("I am {{ f }}"),
+        ],"I am f-call")
