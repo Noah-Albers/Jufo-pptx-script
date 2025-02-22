@@ -20,24 +20,40 @@ def _clamp(value, min_value, max_value):
 
 class EasySlide:
 
+    # TODO: Maybe implement a cache for the __get_placeholders
+
     def __init__(self, slide: Slide, pptx: EasyPresentation):
         self.__slide = slide
         self.__pptx = pptx
 
+    def __get_placeholders(self):
+        """
+        Create a list of 2-item tuples.
+        First item being the new instance of the placeholders in the current slide
+        Second item being the link to the original placeholder
+        """
+        ls = []
+
+        # Iterates over the master-layout
+        for io, pl_master in enumerate(self.__slide.slide_layout.placeholders):
+            # Iterates over all new instances of placeholders
+            for ii, pl_new in enumerate(self.__slide.placeholders):
+                # Checks that they are equal
+                if pl_master.placeholder_format.idx == pl_new.placeholder_format.idx:
+                    ls.append((pl_new, pl_master))
+
+        return ls
+
     def get_placeholder_types(self) -> dict[str, Literal["Picture"] or Literal["Text"] or None]:
         types = dict()
 
-        for shape in self.__slide.shapes:
-            if isinstance(shape, AutoShape):
-                types[shape.text] = None
+        for i, (pln, plm) in enumerate(self.__get_placeholders()):
+            # Gets the placeholder text on the original placeholder
+            text = plm.text
 
-        for i, pl in enumerate(self.__slide.placeholders):
-            # Gets the placeholder text (Which is not accessible otherwise)
-            text = self.__slide.slide_layout.placeholders[i].text
-
-            if isinstance(pl, SlidePlaceholder):
+            if isinstance(pln, SlidePlaceholder):
                 types[text] = "Text"
-            elif isinstance(pl, PicturePlaceholder):
+            elif isinstance(pln, PicturePlaceholder):
                 types[text] = "Picture"
 
         return types
@@ -48,14 +64,15 @@ class EasySlide:
             if isinstance(shape, AutoShape):
                 self.__update_text_placeholder(data, shape.text, shape, template)
 
-        for i, pl in enumerate(self.__slide.placeholders):
-            # Gets the placeholder text (Which is not accessible otherwise)
-            text = self.__slide.slide_layout.placeholders[i].text
 
-            if isinstance(pl, SlidePlaceholder):
-                self.__update_text_placeholder(data, text, pl, template)
-            if isinstance(pl, PicturePlaceholder):
-                self.__update_image_placeholder(data, text, pl, template)
+        for i, (pln, plm) in enumerate(self.__get_placeholders()):
+            # Gets the placeholder text (Which is not accessible otherwise)
+            text = plm.text
+
+            if isinstance(pln, SlidePlaceholder):
+                self.__update_text_placeholder(data, text, pln, template)
+            if isinstance(pln, PicturePlaceholder):
+                self.__update_image_placeholder(data, text, pln, template)
 
     # region Internal template apply mechanism
 
