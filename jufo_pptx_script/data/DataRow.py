@@ -23,6 +23,13 @@ class DataRow:
 
         return f"{self.__title[0]} {self.__data[0]}"
 
+    def has(self, field: str):
+        try:
+            value = self.__data[self.__title.index(field)]
+            return len(value.strip()) > 0
+        except ValueError as err:
+            return False
+
     def get(self, field: str, default_value: Any or None = None, raise_raw_error: bool = False) -> str:
         """
         Getter for any field on the project.

@@ -1,11 +1,12 @@
-from typing import Callable, TypeVar, Generic, Iterator
+from jufo_pptx_script.common.datatypes.ProjectRow import ProjectRow as _ProjectRow
+from jufo_pptx_script.common.datatypes.PriceRow import PriceRow as _PriceRow
+from typing import Callable, Iterator
 
-# Defines a generic type for the items
-T = TypeVar('T')
+class PriceAndProjectRowList:
 
-class DataRowList(Generic[T]):
-    def __init__(self, raw: list[T]):
-        self.__list = raw
+    def __init__(self, rows: [(_ProjectRow, _PriceRow)]):
+        self.__list = rows
+
 
     def skip(self, amount: int):
         """
@@ -21,46 +22,20 @@ class DataRowList(Generic[T]):
         """
         return self.__list[idx]
 
-    def copy_and_split_into(self, size: int):
-        """
-        Copies the list and splits it into small chunks of "size" size.
-
-        For example lets say i have the projects: [A,B,C,D,E,F,G,H,I,J] and use as size 3, it would be returned
-        [
-            [A,B,C], [D,E,F], [G,H,I], [J]
-        ]
-        """
-        if size <= 0:
-            raise ValueError("Split size must be greater than 0")
-
-        list_of_lists = []
-        item_list = []
-
-        for proj in self:
-            if len(item_list) >= size:
-                list_of_lists.append(DataRowList(item_list))
-                item_list = []
-            item_list.append(proj)
-
-        if len(item_list) > 0:
-            list_of_lists.append(DataRowList(item_list))
-
-        return list_of_lists
-
     def copy(self):
         """
         Copies the list and returns it
         """
-        return DataRowList(self.__list.copy())
+        return PriceAndProjectRowList(self.__list.copy())
 
-    def filter(self, filter_func: Callable[[T], bool]):
+    def filter(self, filter_func: Callable[[(_ProjectRow, _PriceRow)], bool]):
         """
         Filters the list (Does not create a new list
         """
         self.__list = list(filter(filter_func, self.__list))
         return self
 
-    def sort(self, sort_func: Callable[[T], any]):
+    def sort(self, sort_func: Callable[[(_ProjectRow, _PriceRow)], any]):
         self.__list = sorted(self.__list, key=sort_func)
         return self
 
@@ -87,7 +62,7 @@ class DataRowList(Generic[T]):
 
     # region Iteration logic
 
-    def __iter__(self) -> Iterator[T]:
+    def __iter__(self) -> Iterator[(_ProjectRow, _PriceRow)]:
         self.__index = 0
         return self
 

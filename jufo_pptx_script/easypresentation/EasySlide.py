@@ -47,6 +47,8 @@ class EasySlide:
     def get_placeholder_types(self) -> dict[str, Literal["Picture"] or Literal["Text"] or None]:
         types = dict()
 
+        placeholders = self.__get_placeholders()
+
         for i, (pln, plm) in enumerate(self.__get_placeholders()):
             # Gets the placeholder text on the original placeholder
             text = plm.text
@@ -121,17 +123,22 @@ class EasySlide:
 
         for text in res:
 
-            # Ensures any none-compliant data types are converted to a string
-            if not isinstance(text, EasyTextformatter):
-                text = str(text)
+            if not type(text) is list:
+                text = [text]
 
-            # If only a text is given, apply it
-            if type(text) is str:
-                frame.paragraphs[0].add_run().text = text
-                continue
+            for part in text:
 
-            # Applies the formatted text
-            text._apply_to_frame(frame)
+                # Ensures any none-compliant data types are converted to a string
+                if not isinstance(part, EasyTextformatter):
+                    part = str(part)
+
+                # If only a text is given, apply it
+                if type(part) is str:
+                    frame.paragraphs[0].add_run().text = part
+                    continue
+
+                # Applies the formatted text
+                part._apply_to_frame(frame)
 
 
     def __update_image_placeholder(self, data: dict[str, Any], raw_text: str,

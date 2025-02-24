@@ -9,7 +9,7 @@ class PriceRow(_AdvancedExtendedRow):
         self._dr = dr
 
         # Ensures the projekt-id exists
-        self.ProjektId()
+        self.ProjektId
 
         # Validates the given Price row's
         if self.HatPreis and not self.Preis in [1,2,3]:
@@ -28,7 +28,19 @@ class PriceRow(_AdvancedExtendedRow):
         return "PriceRow"
 
     def _get_minimal_infos(self) -> str:
-        return self.SonderpreisTitle if self.HatSonderpreis else self.Preis
+
+        fields = {
+            "preis": self.Preis if self.HatPreis else None,
+            "sonderpreis": self.SonderpreisTitle if self.HatSonderpreis else None,
+            "projekt": self.ProjektId
+        }
+
+        # Filter out None values
+        filtered_fields = {key: value for key, value in fields.items() if value is not None}
+
+        # Join the filtered key-value pairs into a string
+        field_str = ", ".join(f"{key}={value}" for key, value in filtered_fields.items())
+        return field_str
 
     @property
     def ProjektId(self):
@@ -50,3 +62,6 @@ class PriceRow(_AdvancedExtendedRow):
     def SonderpreisTitle(self):
         return self.get("sonderpreis")
 
+    @property
+    def Notes(self):
+        return self.get("notizen")

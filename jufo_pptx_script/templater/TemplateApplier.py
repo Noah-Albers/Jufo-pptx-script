@@ -50,6 +50,7 @@ class _TemplateTransformer(_Transformer):
         if func is None:
             raise ValueError(f"Function {func_name} is not defined")
 
+        # TODO: make better
         # Checks if the function shall be ignored
         is_ignored = func == 'ignored_func'
 
@@ -73,17 +74,15 @@ class _TemplateTransformer(_Transformer):
             if len(missing_func_params_names) > 0:
                 raise ValueError(f"Function '{func_name}' requires the parameter(s) '{', '.join(missing_func_params_names)}', which are/were not given.")
 
-            # Checks that not too many parameters are given
-            if len(none_func_params_names) > 0:
-                raise ValueError(f"Function '{func_name}' doesn't have/has the parameter(s) '{', '.join(none_func_params_names)}', but they were passed anyway.")
-
+            # Filters out any parameters that the function does not have any use for
+            args2pass = {key: value for key, value in args2pass.items() if key in func_params_names}
         try:
             result = "" if is_ignored else func(**args2pass)
 
             if isinstance(result, EasyTextformatter):
                 return result
 
-            return str(result)
+            return result
         except Exception as err:
             raise ValueError(f"Function '{func_name}' run into an error while executing: {err}")
 

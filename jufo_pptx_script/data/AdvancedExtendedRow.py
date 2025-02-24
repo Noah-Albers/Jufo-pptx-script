@@ -23,11 +23,7 @@ class AdvancedExtendedRow:
     #endregion
 
     def has(self, field: str):
-        try:
-            self._dr.get(field, raise_raw_error=True)
-            return True
-        except ValueError:
-            return False
+        return self._dr.has(field)
 
     def get(self, field: str):
         try:
@@ -48,6 +44,7 @@ class AdvancedExtendedRow:
             if max_value is not None and value > max_value:
                 raise ValueError(f"{field} has a value {value} but must less or equal to {max_value}.")
 
+            return value
         except ValueError:
             raise ValueError(f"{field} is not an integer, instead is '{value}'.")
 

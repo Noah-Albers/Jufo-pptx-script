@@ -64,7 +64,10 @@ class MemberRowWrapper:
 
     @property
     def Alter(self) -> int:
-        return self._base._get_property_as_int(f"T{self._idx} Alter")
+        raw = self._base.get(f"T{self._idx} Alter")
+        asStrNum = raw.replace("Jahre", "").strip()
+
+        return int(asStrNum)
 
     @property
     def Vorname(self) -> str:
