@@ -1,10 +1,11 @@
-from jufo_pptx_script.common.datatypes.ProjectRow import ProjectRow as _ProjectRow
-from jufo_pptx_script.common.datatypes.PriceRow import PriceRow as _PriceRow
+from functools import cmp_to_key as _cmp_to_key
+
 from typing import Callable, Iterator
+from PriceAndProjectRow import ProjectAndPriceRow as _ProjectAndPrice
 
 class PriceAndProjectRowList:
 
-    def __init__(self, rows: [(_ProjectRow, _PriceRow)]):
+    def __init__(self, rows: [_ProjectAndPrice]):
         self.__list = rows
 
 
@@ -28,15 +29,33 @@ class PriceAndProjectRowList:
         """
         return PriceAndProjectRowList(self.__list.copy())
 
-    def filter(self, filter_func: Callable[[(_ProjectRow, _PriceRow)], bool]):
+    def filter(self, filter_func: Callable[[_ProjectAndPrice], bool]):
         """
         Filters the list (Does not create a new list
         """
         self.__list = list(filter(filter_func, self.__list))
         return self
 
-    def sort(self, sort_func: Callable[[(_ProjectRow, _PriceRow)], any]):
+    def sortByKeys(self, sort_func: Callable[[_ProjectAndPrice], any]):
         self.__list = sorted(self.__list, key=sort_func)
+        return self
+
+    def sortByCompare(self, sort_func: Callable[[_ProjectAndPrice, _ProjectAndPrice], int]):
+        def internal_sort_function(a: _ProjectAndPrice, b: _ProjectAndPrice):
+            res = sort_func(a, b)
+
+            if res == a or res == b:
+                return 1 if a == res else -1
+
+            if type(res) is int:
+                return res
+
+            if type(res) is bool:
+                return 1 if res else -1
+
+            return int(res)
+
+        self.__list.sort(key=_cmp_to_key(internal_sort_function))
         return self
 
 
@@ -62,7 +81,7 @@ class PriceAndProjectRowList:
 
     # region Iteration logic
 
-    def __iter__(self) -> Iterator[(_ProjectRow, _PriceRow)]:
+    def __iter__(self) -> Iterator[_ProjectAndPrice]:
         self.__index = 0
         return self
 

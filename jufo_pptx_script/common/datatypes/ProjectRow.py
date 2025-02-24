@@ -135,8 +135,8 @@ class ProjectRow(_AdvancedExtendedRow):
         return self._tutors[1]
 
     @property
-    def Projektnummer(self) -> int:
-        return self._get_property_as_int("Projektnummer")
+    def Projektnummer(self) -> str:
+        return self.get("Projektnummer")
 
     @property
     def Wettbewerbsjahr(self) -> int:

@@ -1,4 +1,6 @@
 from typing import Callable, TypeVar, Generic, Iterator
+from functools import cmp_to_key as _cmp_to_key
+
 
 # Defines a generic type for the items
 T = TypeVar('T')
@@ -60,10 +62,28 @@ class DataRowList(Generic[T]):
         self.__list = list(filter(filter_func, self.__list))
         return self
 
-    def sort(self, sort_func: Callable[[T], any]):
+
+    def sortByKeys(self, sort_func: Callable[[T], any]):
         self.__list = sorted(self.__list, key=sort_func)
         return self
 
+    def sortByCompare(self, sort_func: Callable[[T, T], int]):
+        def internal_sort_function(a: T, b: T):
+            res = sort_func(a, b)
+
+            if res == a or res == b:
+                return 1 if a == res else -1
+
+            if type(res) is int:
+                return res
+
+            if type(res) is bool:
+                return 1 if res else -1
+
+            return int(res)
+
+        self.__list.sort(key=_cmp_to_key(internal_sort_function))
+        return self
 
     # region Overwritten default functions
 
