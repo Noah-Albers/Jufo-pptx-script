@@ -82,7 +82,7 @@ class _TemplateTransformer(_Transformer):
             if isinstance(result, EasyTextformatter):
                 return result
 
-            return result
+            return str(result)
         except Exception as err:
             raise ValueError(f"Function '{func_name}' run into an error while executing: {err}")
 

@@ -12,7 +12,7 @@ class PriceRow(_AdvancedExtendedRow):
         self.ProjektId
 
         # Validates the given Price row's
-        if self.HatPreis and not self.Preis in [1,2,3]:
+        if self.HatPreis and not self.Preis in [-1, 1,2,3]:
             raise ValueError(f"The 'price' '{self.Preis}' is not valid.")
 
         if self.HatSonderpreis and type(self.SonderpreisTitle) is not str:
@@ -47,8 +47,14 @@ class PriceRow(_AdvancedExtendedRow):
         return self.get("id")
 
     @property
-    def Preis(self) -> 1 or 2 or 3:
-        return self._get_property_as_int("preis")
+    def Preis(self) -> -1 or 1 or 2 or 3:
+        value = self.get("preis")
+        if len(value.strip()) <= 0:
+            value = -1
+
+        value = int(value)
+
+        return value
 
     @property
     def HatSonderpreis(self):

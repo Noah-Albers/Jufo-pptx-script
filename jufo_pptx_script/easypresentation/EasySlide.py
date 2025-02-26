@@ -11,7 +11,6 @@ from pptx.shapes.placeholder import SlidePlaceholder, PicturePlaceholder
 from pptx.shapes.autoshape import Shape as AutoShape
 from typing import Any, Literal
 import sys
-import jufo_pptx_script.easypresentation.EasyTextformatter
 
 
 def _clamp(value, min_value, max_value):

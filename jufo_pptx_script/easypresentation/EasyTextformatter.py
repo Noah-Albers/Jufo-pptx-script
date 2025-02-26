@@ -21,9 +21,13 @@ class EasyTextformatter:
         self._font_name = None
         self._font_size = None
         self._font_color = None
+        self._next_node: EasyTextformatter or None = None
 
     # region Special values
 
+    def next(self, text: str):
+        self._next_node = EasyTextformatter(text)
+        return self._next_node
 
     def kerning(self, kerning: int):
         self._kerning = kerning
@@ -99,7 +103,9 @@ class EasyTextformatter:
     # endregion
 
     def __str__(self):
-        return self._text
+        after = str(self._next_node) if self._next_node is not None else ""
+
+        return self._text+after
 
     def _apply_to_frame(self, frame: SlidePlaceholder or AutoShape):
         """
@@ -140,3 +146,6 @@ class EasyTextformatter:
             r.font.size = self._font_size
         if self._font_color is not None:
             r.self.color.rgb = self._font_color
+
+        if self._next_node is not None:
+            self._next_node._apply_to_frame(frame)

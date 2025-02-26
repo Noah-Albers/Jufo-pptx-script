@@ -1,7 +1,7 @@
 from functools import cmp_to_key as _cmp_to_key
 
 from typing import Callable, Iterator
-from PriceAndProjectRow import ProjectAndPriceRow as _ProjectAndPrice
+from jufo_pptx_script.common.datatypes.PriceAndProjectRow import ProjectAndPriceRow as _ProjectAndPrice
 
 class PriceAndProjectRowList:
 
