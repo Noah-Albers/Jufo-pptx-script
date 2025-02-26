@@ -26,7 +26,11 @@ class EasyTextformatter:
     # region Special values
 
     def next(self, text: str):
-        self._next_node = EasyTextformatter(text)
+        # TODO: Improve. Check circular reference and such
+        if isinstance(text, EasyTextformatter):
+            self._next_node = text
+        else:
+            self._next_node = EasyTextformatter(text)
         return self._next_node
 
     def kerning(self, kerning: int):
