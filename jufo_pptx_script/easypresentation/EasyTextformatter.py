@@ -3,6 +3,10 @@ from pptx.shapes.placeholder import SlidePlaceholder
 from pptx.shapes.autoshape import Shape as AutoShape
 from pptx.util import Pt
 
+class EasyTextformatterList:
+    def __init__(self, elements):
+        self.elements = elements
+
 
 class EasyTextformatter:
 
@@ -21,17 +25,8 @@ class EasyTextformatter:
         self._font_name = None
         self._font_size = None
         self._font_color = None
-        self._next_node: EasyTextformatter or None = None
 
     # region Special values
-
-    def next(self, text: str):
-        # TODO: Improve. Check circular reference and such
-        if isinstance(text, EasyTextformatter):
-            self._next_node = text
-        else:
-            self._next_node = EasyTextformatter(text)
-        return self._next_node
 
     def kerning(self, kerning: int):
         self._kerning = kerning
@@ -107,9 +102,7 @@ class EasyTextformatter:
     # endregion
 
     def __str__(self):
-        after = str(self._next_node) if self._next_node is not None else ""
-
-        return self._text+after
+        return self._text
 
     def _apply_to_frame(self, frame: SlidePlaceholder or AutoShape):
         """
@@ -149,7 +142,4 @@ class EasyTextformatter:
         if self._font_size is not None:
             r.font.size = self._font_size
         if self._font_color is not None:
-            r.self.color.rgb = self._font_color
-
-        if self._next_node is not None:
-            self._next_node._apply_to_frame(frame)
+            r.font.color.rgb = self._font_color

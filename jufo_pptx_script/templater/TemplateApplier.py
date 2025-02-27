@@ -1,7 +1,7 @@
 import lark.exceptions
 from lark import Lark as _Lark, Transformer as _Transformer
 
-from jufo_pptx_script.easypresentation.EasyTextformatter import EasyTextformatter
+from jufo_pptx_script.easypresentation.EasyTextformatter import EasyTextformatter, EasyTextformatterList
 from jufo_pptx_script.templater.Template import Template as _Template
 from jufo_pptx_script.templater.ImagePropertiesParser import ImageInfoParser as _ImageInfoParser
 from dataclasses import dataclass as _dt
@@ -79,10 +79,16 @@ class _TemplateTransformer(_Transformer):
         try:
             result = "" if is_ignored else func(**args2pass)
 
-            if isinstance(result, EasyTextformatter):
-                return result
+            if not type(result) is list:
+                result = [result]
 
-            return str(result)
+            # Ensures the correct datatypes
+            if type(result) is list:
+                for idx, value in enumerate(result):
+                    if not isinstance(value, EasyTextformatter):
+                        result[idx] = str(value)
+
+            return EasyTextformatterList(result)
         except Exception as err:
             raise ValueError(f"Function '{func_name}' run into an error while executing: {err}")
 
@@ -145,7 +151,7 @@ class TemplateApplier:
             # Creates a flat list of the results
             output = []
             for item in results.children:
-                if isinstance(item, str) or isinstance(item, EasyTextformatter):
+                if isinstance(item, str) or isinstance(item, EasyTextformatterList):
                     output.append(item)
                 else:
                     output.append(item.children[0])

@@ -1,6 +1,6 @@
 from pptx.dml.color import RGBColor
 
-from jufo_pptx_script.easypresentation.EasyTextformatter import EasyTextformatter
+from jufo_pptx_script.easypresentation.EasyTextformatter import EasyTextformatter, EasyTextformatterList
 from jufo_pptx_script.templater.Template import Template
 from jufo_pptx_script.templater.TemplateApplier import ImageParseResult
 from pptx.slide import Slide
@@ -120,12 +120,11 @@ class EasySlide:
         # Gets the text-frame (Used to apply formatting and texts)
         frame = element.text_frame
 
-        for text in res:
+        for textList in res:
 
-            if not type(text) is list:
-                text = [text]
+            elements = textList.elements
 
-            for part in text:
+            for part in elements:
 
                 # Ensures any none-compliant data types are converted to a string
                 if not isinstance(part, EasyTextformatter):
