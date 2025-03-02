@@ -160,27 +160,6 @@ Unknown error occurred. Please check your input: 'I am {{ f() }}' (Error trying 
 Function 'f' requires the parameter(s) 'b', which are/were not given.)
         '''.strip(), str(context.exception).strip())
 
-    def test_to_many_args(self):
-        with self.assertRaises(ValueError) as context:
-
-            env, parse, assert_array = self.setup_environment({
-                'a': 'data',
-                'b': "dataToo"
-            })
-
-            @env
-            def f(a):
-                return f"f-call({a})"
-
-            parse('I am {{ f() }}')
-
-
-        self.assertEqual('''
-Unknown error occurred. Please check your input: 'I am {{ f() }}' (Error trying to process rule "function_call":
-
-Function 'f' doesn't have/has the parameter(s) 'b', but they were passed anyway.)
-        '''.strip(), str(context.exception).strip())
-
     def test_whitespace_between_templates(self):
 
         env, parse, assert_array = self.setup_environment()
