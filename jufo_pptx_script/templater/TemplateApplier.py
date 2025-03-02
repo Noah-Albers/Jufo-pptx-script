@@ -137,7 +137,7 @@ class TemplateApplier:
         return ImageParseResult(path, scale, res)
 
     def parse_as_string(self, template: _Template, data: Dict[str, Any], text: str) -> str:
-        return ''.join(self.parse(template, data, text))
+        return ''.join(map(lambda x: str(x), self.parse(template, data, text)))
 
     def parse(self, template: _Template, data: Dict[str, Any], text: str) -> [str or EasyTextformatter]:
         if len(text) <= 0:

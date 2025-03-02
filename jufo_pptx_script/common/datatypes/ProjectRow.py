@@ -9,11 +9,14 @@ class TutorRowWrapper:
         self._name_cache: [str, str, str] or None = None
 
     def _create_name_cache(self):
+        if self._name_cache is not None:
+            return
+
         raw_value = self._base.get(f"Projektbetreuer {self._idx}")
         value = raw_value.split(" ")
 
-        if len(value) == 0 and len(value[0].strip()) == 0:
-            self._name_cache = ["", "", ""]
+        if len(value) == 1 and len(value[0].strip()) == 0:
+            value = ["", "", ""]
 
         # Ensures correct formatting
         if not (2 <= len(value) <= 3):
@@ -27,7 +30,7 @@ class TutorRowWrapper:
     @property
     def Ist_Existent(self):
         self._create_name_cache()
-        return all(map(lambda x: len(x) == 0, self._name_cache))
+        return not all(map(lambda x: len(x) == 0, self._name_cache))
 
     @property
     def Schule(self):
@@ -35,23 +38,17 @@ class TutorRowWrapper:
 
     @property
     def Vorname(self):
-        if self._name_cache is None:
-            self._create_name_cache()
-
+        self._create_name_cache()
         return self._name_cache[2]
 
     @property
     def Nachname(self):
-        if self._name_cache is None:
-            self._create_name_cache()
-
+        self._create_name_cache()
         return self._name_cache[1]
 
     @property
     def Title(self):
-        if self._name_cache is None:
-            self._create_name_cache()
-
+        self._create_name_cache()
         return self._name_cache[0]
 
 class MemberRowWrapper:
