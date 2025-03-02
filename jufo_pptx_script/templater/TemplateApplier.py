@@ -50,34 +50,29 @@ class _TemplateTransformer(_Transformer):
         if func is None:
             raise ValueError(f"Function {func_name} is not defined")
 
-        # TODO: make better
-        # Checks if the function shall be ignored
-        is_ignored = func == 'ignored_func'
+        # Checks that the keys from the function and args2pass dict match
+        sig = inspect.signature(func)
 
-        if not is_ignored:
-            # Checks that the keys from the function and args2pass dict match
-            sig = inspect.signature(func)
+        # Gets all parameter's in general
+        func_params = sig.parameters.values()
+        func_params_names = list(map(lambda param: param.name, func_params))
 
+        # Gets all parameters that are required to run the function but are missing
+        missing_func_params = filter(lambda param: param.default is param.empty and param.name not in args2pass, func_params)
+        missing_func_params_names = list(map(lambda param: param.name, missing_func_params))
 
-            # Gets all parameter's in general
-            func_params = sig.parameters.values()
-            func_params_names = list(map(lambda param: param.name, func_params))
+        # Gets the parameters that have been submitted but are not part of the function
+        none_func_params_names = list(filter(lambda name: name not in func_params_names, args2pass.keys()))
 
-            # Gets all parameters that are required to run the function but are missing
-            missing_func_params = filter(lambda param: param.default is param.empty and param.name not in args2pass, func_params)
-            missing_func_params_names = list(map(lambda param: param.name, missing_func_params))
+        # Checks that all required parameters are given
+        if len(missing_func_params_names) > 0:
+            raise ValueError(f"Function '{func_name}' requires the parameter(s) '{', '.join(missing_func_params_names)}', which are/were not given.")
 
-            # Gets the parameters that have been submitted but are not part of the function
-            none_func_params_names = list(filter(lambda name: name not in func_params_names, args2pass.keys()))
+        # Filters out any parameters that the function does not have any use for
+        args2pass = {key: value for key, value in args2pass.items() if key in func_params_names}
 
-            # Checks that all required parameters are given
-            if len(missing_func_params_names) > 0:
-                raise ValueError(f"Function '{func_name}' requires the parameter(s) '{', '.join(missing_func_params_names)}', which are/were not given.")
-
-            # Filters out any parameters that the function does not have any use for
-            args2pass = {key: value for key, value in args2pass.items() if key in func_params_names}
         try:
-            result = "" if is_ignored else func(**args2pass)
+            result = func(**args2pass)
 
             if not type(result) is list:
                 result = [result]
@@ -139,7 +134,7 @@ class TemplateApplier:
     def parse_as_string(self, template: _Template, data: Dict[str, Any], text: str) -> str:
         return ''.join(map(lambda x: str(x), self.parse(template, data, text)))
 
-    def parse(self, template: _Template, data: Dict[str, Any], text: str) -> [str or EasyTextformatter]:
+    def parse(self, template: _Template, data: Dict[str, Any], text: str) -> [str or EasyTextformatterList]:
         if len(text) <= 0:
             return []
 

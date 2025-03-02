@@ -9,5 +9,7 @@ from tqdm import tqdm as inform_user
 from jufo_pptx_script.easypresentation.EasyTextformatter import EasyTextformatter as format
 from jufo_pptx_script.common.datatypes.PriceAndProjectRow import ProjectAndPriceRow
 from jufo_pptx_script.common.datatypes.PriceAndProjectRowList import PriceAndProjectRowList
+from jufo_pptx_script.common.jufo.JufoConstants import *
+from jufo_pptx_script.common.jufo.JufoFunctions import validate_fachbereich_and_sparte
 
 IGNORE_IMAGE_FLAG = "IGNORE_FLAG"

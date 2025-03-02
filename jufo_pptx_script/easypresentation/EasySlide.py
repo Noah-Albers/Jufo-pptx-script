@@ -120,11 +120,15 @@ class EasySlide:
         # Gets the text-frame (Used to apply formatting and texts)
         frame = element.text_frame
 
-        for textList in res:
+        # Iterates over all parsed parts of the text
+        # element is either a EasyTextformatterList or a string
+        for textElm in res:
 
-            elements = textList.elements
+            # Gets the list
+            ls = textElm.elements if isinstance(textElm, EasyTextformatterList) else [textElm]
 
-            for part in elements:
+            # Iterates over all parts
+            for part in ls:
 
                 # Ensures any none-compliant data types are converted to a string
                 if not isinstance(part, EasyTextformatter):

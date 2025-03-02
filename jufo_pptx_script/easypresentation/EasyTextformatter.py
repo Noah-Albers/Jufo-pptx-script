@@ -43,14 +43,27 @@ class EasyTextformatter:
         self._font_size = Pt(size_in_pts)
         return self
 
-    def font_color(self, red: int, green: int, blue: int):
+    def rgb_color(self, red: int, green: int, blue: int):
         """
         Args:
             red: 0-255
             green: 0-255
             blue: 0-255
         """
-        self._font_color = RGBColor(red,green,blue)
+        self._font_color = RGBColor(red, green, blue)
+        return self
+
+    def hex_color(self, hex: int):
+        """
+        Args:
+            hex: 0x000000 - 0xffffff
+            8bit red, 8bit green, 8bit blue
+        """
+        self._font_color = RGBColor(
+            hex >> 16 & 0xff,
+            hex >> 8 & 0xff,
+            hex & 0xff
+        )
         return self
 
     # endregion

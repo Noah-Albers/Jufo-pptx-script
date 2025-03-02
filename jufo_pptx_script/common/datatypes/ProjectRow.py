@@ -28,7 +28,7 @@ class TutorRowWrapper:
         self._name_cache = value
 
     @property
-    def Ist_Existent(self):
+    def IstExistent(self):
         self._create_name_cache()
         return not all(map(lambda x: len(x) == 0, self._name_cache))
 
@@ -51,6 +51,23 @@ class TutorRowWrapper:
         self._create_name_cache()
         return self._name_cache[0]
 
+    @property
+    def HatTitle(self):
+        return len(self.Title.strip()) > 0
+
+    def gib_namen_im_standardformat(self):
+        """
+        Returns: the name formatted in a common format:
+        [Title ]Firstname Last-Name
+        """
+
+        title = "" if not self.HatTitle else f"{self.Title.capitalize()} "
+
+        fn = '-'.join(map(lambda part: part.capitalize(), self.Vorname.split("-")))
+        ln = '-'.join(map(lambda part: part.capitalize(), self.Nachname.split("-")))
+
+        return f"{title}{fn} {ln}"
+
 class MemberRowWrapper:
     def __init__(self, idx: int, base):
         self._idx = idx
@@ -58,6 +75,10 @@ class MemberRowWrapper:
 
     def get(self, field: str):
         return self._base.get(f"T{self._idx} {field}")
+
+    @property
+    def IstExistent(self):
+        return len(self.Vorname.strip()) <= 0
 
     @property
     def Alter(self) -> int:
